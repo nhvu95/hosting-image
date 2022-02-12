@@ -4,43 +4,36 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 import javax.swing.ImageIcon;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.nhvu95.hostingimage.ds.ConfigDS;
-import com.nhvu95.hostingimage.imgur.Variation;
-import com.nhvu95.hostingimage.imgur.VariationRepository;
 import com.nhvu95.hostingimage.utilities.Utilities;
-
-import ch.qos.logback.core.rolling.helper.CompressionMode;
-import ch.qos.logback.core.rolling.helper.Compressor;
-import lombok.extern.log4j.Log4j;
+import com.tinify.AccountException;
+import com.tinify.ClientException;
+import com.tinify.ConnectionException;
+import com.tinify.ServerException;
+import com.tinify.Tinify;
 
 @Service
 public class ImageComputeServiceImpl implements ImageComputeService {
 	@Value("${image.temp.path}")
 	private String tempPath = "./images";
+	@Value("${tinify.api.key}")
+	private String TINIFY_API_KEY = "";
 
 	private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory
 			.getLog(ImageComputeService.class);
+
+	public ImageComputeServiceImpl() {
+		Tinify.setKey(this.TINIFY_API_KEY);
+	}
 
 	public String calculateVariation(InputStream image, String originUUID, ConfigDS config) {
 
@@ -81,13 +74,27 @@ public class ImageComputeServiceImpl implements ImageComputeService {
 	public void compressImage(String filePath) throws IOException {
 
 		try {
-			Compressor compressor = new Compressor(CompressionMode.GZ);
-			compressor.compress(filePath, tempPath + "/" + "compressed." + Utilities.getFileExtension(filePath), null);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			File tmp = new File(filePath);
+			tmp.getParent();
+			Tinify.fromFile(filePath).toFile(filePath);
 
+			// Use the Tinify API client.
+		} catch (AccountException e) {
+			System.out.println("The error message is: " + e.getMessage());
+			// Verify your API key and account limit.
+		} catch (ClientException e) {
+			// Check your source image and request options.
+			this.log.error(e.toString());
+		} catch (ServerException e) {
+			// Temporary issue with the Tinify API.
+			this.log.error(e.toString());
+		} catch (ConnectionException e) {
+			// A network connection error occurred.
+			this.log.error(e.toString());
+		} catch (java.lang.Exception e) {
+			// Something else went wrong, unrelated to the Tinify API.
+			this.log.error(e.toString());
+		}
 	}
 
 	public void savePic(Image image, String type, String dst, int w, int h) {
