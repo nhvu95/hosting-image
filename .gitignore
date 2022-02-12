@@ -18,6 +18,8 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+/images/
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -36,3 +38,7 @@ out/
 
 ### VS Code ###
 .vscode/
+=======
+.vscode/
+
+/src/main/resources/application.properties

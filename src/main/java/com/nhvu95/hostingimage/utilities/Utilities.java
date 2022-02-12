@@ -1,5 +1,13 @@
 package com.nhvu95.hostingimage.utilities;
 
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
 import com.nhvu95.hostingimage.ds.EImageType;
 
 public class Utilities {
@@ -28,5 +36,28 @@ public class Utilities {
 			return EImageType.SVG;
 		}
 		return EImageType.PNG;
+	}
+
+	public static Rectangle getImageSize(File file) {
+		Image originalImage;
+		try {
+			originalImage = ImageIO.read(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		ImageIcon imgIcon = new ImageIcon(originalImage);
+		int width = imgIcon.getIconWidth();
+		int height = imgIcon.getIconHeight();
+		return new Rectangle(width, height);
+	}
+
+	public static void delelteFile(File file) {
+		try {
+			file.deleteOnExit();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
 	}
 }

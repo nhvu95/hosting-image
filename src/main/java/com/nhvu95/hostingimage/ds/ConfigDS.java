@@ -1,5 +1,7 @@
 package com.nhvu95.hostingimage.ds;
 
+import java.awt.Rectangle;
+
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nhvu95.hostingimage.dto.UploadConfig;
@@ -25,5 +27,13 @@ public class ConfigDS {
 		this.keepRatio = config.keepRatio;
 		this.lazyLoad = config.lazyLoad;
 		this.imgurMode = config.imgurMode;
+	}
+
+	public Rectangle getImageSize() {
+		return new Rectangle(this.width, this.height);
+	}
+
+	public boolean isAutoSize() {
+		return this.width == 0 && this.height == 0;
 	}
 }

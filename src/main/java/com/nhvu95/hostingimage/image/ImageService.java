@@ -20,4 +20,5 @@ public interface ImageService {
 
 	public List<Image> getImageList();
 
+	public String getImage(String fileId);
 }

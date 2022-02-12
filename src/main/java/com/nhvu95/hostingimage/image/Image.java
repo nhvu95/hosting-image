@@ -2,22 +2,31 @@ package com.nhvu95.hostingimage.image;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
+
+import com.nhvu95.hostingimage.imgur.Variation;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
 @Getter
 @Setter
+@Entity
+@Table(name = "image")
 public class Image implements Serializable {
 
 	/**
@@ -28,17 +37,29 @@ public class Image implements Serializable {
 	public Image() {
 		super();
 		this.handled = false;
+		this.variations = new HashSet<Variation>();
 	}
 
 	@Id
-	@GenericGenerator(name = "UUIDGenerator", strategy = "uuid2")
-	@GeneratedValue(generator = "UUIDGenerator")
+    @GenericGenerator(name = "id", strategy = "com.nhvu95.hostingimage.utilities.ImageIdGenerator")
+	@GeneratedValue(generator = "id")
 	@Column(name = "id", updatable = false, nullable = false)
-	UUID id;
+	String id;
 
-	@Column(name = "upload_date", columnDefinition = "TIMESTAMP DEFAULT now()", nullable = false, insertable = false)
+	@Column(name = "upload_date", insertable = false, updatable = false)
 	Timestamp uploadDate;
 
+	@Column(name = "owner")
+	UUID owner;
+	
 	@Column(name = "handled")
 	boolean handled;
+
+	@OneToMany(mappedBy = "image", cascade = { CascadeType.ALL })
+	Set<Variation> variations;
+
+	public void addVariation(Variation variation) {
+		variations.add(variation);
+		variation.setImage(this);
+	}
 }
